@@ -59,3 +59,28 @@ jobs:
             draft: true
             name: dev
             files: greetings-deploy.jar
+
+    deplloy-prod:
+      
+      needs: [build-and-test]
+      if: github.ref == 'refs/heads/main'
+
+      runs-on: ubuntu-latest
+      environment: 
+        name: prod
+        url: https://github.com/${{ github.repository }}/releases/tag/v${{ vars.PROD_VERSION }}
+
+      steps:
+        - name: Download candidate artifacts
+          uses: actions/download-artifacts@v3
+          with:
+            name: archive.zip
+            
+        - name: GH Release
+          uses: softprops/action-gh-release@v0.1.15
+          with: 
+            tag_name: v${{vars.PROD_VERSION}}
+            token: ${{secrets.PROD_TOKEN}}
+            generate_release_notes: true
+            name: Production
+            files: greetings-deploy.jar    
